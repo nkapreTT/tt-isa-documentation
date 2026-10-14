@@ -34,8 +34,8 @@ The [`ATGETM`](ATGETM.md) and [`ATRELM`](ATRELM.md) instructions manipulate thes
 Instruction descriptions assume the presence of the following global variable:
 ```c
 struct {
-  uint4_t Value;
-  uint4_t Max;
+  uint4_t Value = 0;
+  uint4_t Max = 15;
 } Semaphores[8];
 ```
 
