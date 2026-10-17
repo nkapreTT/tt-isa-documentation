@@ -70,7 +70,7 @@ The [`SETRWC`](SETRWC.md) and [`INCRWC`](INCRWC.md) instructions exist purely to
 
 The [`SETC16`](SETC16.md) instruction is used to set the various bits of `ThreadConfig` which are used to apply the two `AddrMod` bits.
 
-In a few cases, the two `AddrMod` bits are able to perform a manipulation which the [`SETRWC`](SETRWC.md) and [`INCRWC`](INCRWC.md) instructions are incapable of. In these cases, it can sometimes be useful to have an instruction which doesn't _consume_ RWCs, but still has two `AddrMod` bits and applies them to RWCs. It is possible to use [`ZEROACC`](ZEROACC.md) for this purpose: if `Mode = ZEROACC_MODE_16_ROWS` and `Imm10 = 0xff` then the instruction will do nothing other than apply two `AddrMod` bits. It is also possible to use any of the `...3S1` or `...3S2` instructions for this purpose.
+In a few cases, the `AddrMod` bits are able to perform a manipulation which the [`SETRWC`](SETRWC.md) and [`INCRWC`](INCRWC.md) instructions are incapable of. In these cases, it can sometimes be useful to have an instruction which doesn't _consume_ RWCs, but still has `AddrMod` bits and applies them to RWCs. It is possible to use [`SFPLOAD`](SFPLOAD.md) for this purpose: if `VD` is 8 or more and `Mod0` is not `MOD0_FMT_INT32_ALL`, then the instruction will do nothing other than `ApplyPartialAddrMod(AddrMod)`, which leaves `FidelityPhase` unchanged. [`ZEROACC`](ZEROACC.md) with `Mode = ZEROACC_MODE_16_ROWS` and `Imm10 = 0xff` is not suitable: on Wormhole it applies `AddrMod` and clears nothing only as `NonContractualBehavior`, and on Blackhole it clears 16 rows of `Dst`. Nor are the `...3S1` and `...3S2` instructions, as they compute `Dst += 0` (see [Matrix Unit](MatrixUnit.md)).
 
 ## See also
 
