@@ -70,7 +70,7 @@ Most of the time, software does not need to care about the exact bit layout of t
 
 ![](../../../Diagrams/Out/Bits32_Dst16_FP16.svg)
 
-The representation of infinity differs from IEEE 754, and NaN is not supported; see [FP16 bit patterns](FloatBitPatterns.md#fp16) for details.
+The representation of infinity differs from IEEE 754, and NaN is not supported; see [FP16 bit patterns](../../../WormholeB0/TensixTile/TensixCoprocessor/FloatBitPatterns.md#fp16) for details.
 
 **Integer "8":**
 

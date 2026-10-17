@@ -1,6 +1,6 @@
 # `SFPLOAD` (Move from `Dst` to `LReg`)
 
-**Summary:** Move (up to) 32 datums from the even or odd columns of four consecutive rows of [`Dst`](Dst.md) to an `LReg`. To bridge the gap between [`Dst` data types](Dst.md#data-types) and [`LReg` data types](LReg.md#data-types), some data type conversions are supported as part of the instruction, though software might still want a subsequent `SFPSTOCHRND` or `SFPCAST` instruction to achieve a richer set of conversions.
+**Summary:** Move (up to) 32 datums from the even or odd columns of four consecutive rows of [`Dst`](Dst.md) to an `LReg`. To bridge the gap between [`Dst` data types](Dst.md#data-types) and [`LReg` data types](../../../WormholeB0/TensixTile/TensixCoprocessor/LReg.md#data-types), some data type conversions are supported as part of the instruction, though software might still want a subsequent `SFPSTOCHRND` or `SFPCAST` instruction to achieve a richer set of conversions.
 
 **Backend execution unit:** [Vector Unit (SFPU)](VectorUnit.md), load sub-unit
 
@@ -27,7 +27,7 @@ TT_SFPLOAD(/* u4 */ VD, /* u4 */ Mod0, /* u3 */ AddrMod, /* u10 */ Imm10)
 
 One of the following data type conversions is specified using the `Mod0` field:
 
-|`SFPLOAD` Mode|Expected [`Dst` data type](Dst.md#data-types)|→|Resultant [`LReg` data type](LReg.md#data-types)|
+|`SFPLOAD` Mode|Expected [`Dst` data type](Dst.md#data-types)|→|Resultant [`LReg` data type](../../../WormholeB0/TensixTile/TensixCoprocessor/LReg.md#data-types)|
 |---|---|---|---|
 |`MOD0_FMT_FP16`|FP16 (configurable handling of infinity)|→|FP32|
 |`MOD0_FMT_BF16`|BF16|→|FP32|

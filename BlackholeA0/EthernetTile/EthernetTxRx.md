@@ -236,7 +236,7 @@ RX queue #0 has `RXQ_BASE` of `0xFFB9_4000`, RX queue #1 has `RXQ_BASE` of `0xFF
 
 ### `ETH_RXQ_TILE_HEADER_FORMAT`
 
-This serves the same purpose as [`STREAM_MSG_HEADER_FORMAT_REG_INDEX`](../NoC/Overlay/README.md#stream_msg_header_format_reg_index), just for TT-link NoC Overlay packets received over Ethernet, rather than NoC Overlay packets received over the NoC.
+This serves the same purpose as [`STREAM_MSG_HEADER_FORMAT_REG_INDEX`](../../WormholeB0/NoC/Overlay/README.md#stream_msg_header_format_reg_index), just for TT-link NoC Overlay packets received over Ethernet, rather than NoC Overlay packets received over the NoC.
 
 |First&nbsp;bit|#&nbsp;Bits|Purpose|
 |--:|--:|---|

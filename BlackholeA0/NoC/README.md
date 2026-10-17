@@ -31,7 +31,7 @@ There are various types of request packet:
     * Optionally with first 128b of data stored to two separate addresses in receiver's L1
   * Optionally broadcast to a rectangle of multiple receivers (though if so, receivers can only be Tensix tiles)
   * Optionally have NoC overlay in receiver tile(s) notified of the write
-* [**Atomic**](Atomics.md): Data is 32b immediate or two 4b immediates, acting on 128b in receiver's [L1](../TensixTile/L1.md#atomics), 32b result delivered back to (usually) initiator's L1
+* [**Atomic**](Atomics.md): Data is 32b immediate or two 4b immediates, acting on 128b in receiver's [L1](../../WormholeB0/TensixTile/L1.md#atomics), 32b result delivered back to (usually) initiator's L1
   * Optionally posted (i.e. receiver does _not_ send a response packet containing acknowledgement and 32b of data)
   * Optionally broadcast to a rectangle of multiple receivers (though if so, receivers can only be Tensix tiles)
 

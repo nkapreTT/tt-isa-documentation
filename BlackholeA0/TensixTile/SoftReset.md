@@ -230,7 +230,7 @@ Each packer has a single reset bit associated with it. Note that bit 17 also aff
 
 Part of bit 17 affects the connection between all packers and `Dst`.
 
-**Upon entering soft reset:** Invokes [the `Reset` function](TensixCoprocessor/Packers/ExponentHistogram.md#functional-model) on the exponent histogram of all four packers (software is encouraged to use [`CLREXPHIST`](TensixCoprocessor/CLREXPHIST.md) for this, rather than relying heavily on soft reset).
+**Upon entering soft reset:** Invokes [the `Reset` function](../../WormholeB0/TensixTile/TensixCoprocessor/Packers/ExponentHistogram.md#functional-model) on the exponent histogram of all four packers (software is encouraged to use [`CLREXPHIST`](TensixCoprocessor/CLREXPHIST.md) for this, rather than relying heavily on soft reset).
 
 **Whilst held in soft reset:** [`PACR`](TensixCoprocessor/PACR.md) instructions reading from `Dst` will behave strangely.
 
