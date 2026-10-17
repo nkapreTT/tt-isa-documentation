@@ -24,3 +24,7 @@ uint16_t *HalfReg = (char*)&GPRs[CurrentThread][0] + ResultHalfReg * 2;
 ## Performance
 
 This instruction executes in a single cycle, though if the Scalar Unit is busy with other instructions, it might have to wait at the Wait Gate until the Scalar Unit can accept it.
+
+## Instruction scheduling
+
+On Blackhole, if an instruction executing at a unit other than the Scalar Unit (for example [`WRCFG`](WRCFG.md)) wants to consume the GPR written by `SETDMAREG`, then software must place a [`STALLWAIT`](STALLWAIT.md) with condition C0 between the two; see [Scalar Unit (ThCon)](ScalarUnit.md). This is not required on Wormhole.

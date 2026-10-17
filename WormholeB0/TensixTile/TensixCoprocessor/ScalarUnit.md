@@ -6,6 +6,8 @@ The Scalar Unit can accept at most one instruction per cycle, and usually takes 
 * No instructions from any other thread can pass through their Wait Gate and enter the Scalar Unit. In other words, the Scalar Unit is executing at most one instruction at a time, and has no internal pipelining.
 * No instructions of any kind from the issuing thread can pass through its Wait Gate. In other words, once a thread has started executing a Scalar Unit instruction, it cannot start executing its next instruction until the Scalar Unit instruction completes, regardless of which unit that next instruction executes in. Note that the converse is not true: a thread can usually start executing a Scalar Unit instruction _before_ prior instructions at other units have finished executing.
 
+On Blackhole, the second point only applies to the issuing thread's subsequent Scalar Unit instructions: the thread can start its next instruction at any other unit while a Scalar Unit instruction is still executing. If that instruction consumes something written by the Scalar Unit instruction, for example [`WRCFG`](WRCFG.md) reading a GPR written by [`SETDMAREG`](SETDMAREG.md) or [`ADDDMAREG`](ADDDMAREG.md), then software must place a [`STALLWAIT`](STALLWAIT.md) between the two, specifying condition C0 and a block mask which covers the consuming instruction (e.g. B7 for `WRCFG`). Inserting NOPs is not a reliable alternative, as the number required depends on how long the Scalar Unit instruction takes.
+
 The instructions executed by the Scalar Unit are:
 
 |Instruction(s)|Number of cycles required for execution|
