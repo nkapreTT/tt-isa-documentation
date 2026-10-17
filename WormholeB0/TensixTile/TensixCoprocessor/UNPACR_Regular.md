@@ -296,9 +296,18 @@ if (UpsampleZeroes || UpsampleInterleave || ColShift) {
 }
 
 // Check that various settings are compatible with each other:
-if (Transpose || DiscontiguousInputRows || BfpExpStream) {
+if (Transpose || DiscontiguousInputRows) {
   // These modes require that InAddr_Datums start at an aligned 16 byte boundary.
   if (InAddr_Datums != floor(InAddr_Datums / 16.) * 16.) {
+    UndefinedBehavior();
+  }
+}
+if (BfpExpStream) {
+  // InAddr_Datums must start at an aligned 16 byte boundary, except that BFP4 and BFP2 datums can
+  // start partway into a 16 byte word if they start a new exponent and also end within that word.
+  // Otherwise, hardware can pair datums with the wrong exponents, or drop them.
+  double Misalignment = InAddr_Datums - floor(InAddr_Datums / 16.) * 16.;
+  if (Misalignment != 0 && ((FirstDatum % 16) != 0 || Misalignment + InputNumDatums * DatumSizeBytes > 16)) {
     UndefinedBehavior();
   }
 }
