@@ -710,6 +710,16 @@ local diagrams = {
       {24, 8, "0x10"},
     }
   end,
+  ZEROACC_BH = function()
+    return Bits32{
+      {0, 10, "Imm10"},
+      {14, 3, "AddrMod", y = 1},
+      {17, 1, "Revert", y = 2, edge = "left"},
+      {18, 1, "UseDst32b", y = 3},
+      {19, 3, "Mode", y = 1},
+      {24, 8, "0x10"},
+    }
+  end,
   TRNSPSRCB = function()
     return Bits32{
       {24, 8, "0x16"},

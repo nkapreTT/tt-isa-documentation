@@ -12,7 +12,7 @@ In addition, each of the 1024 rows has 1 valid bit associated with it:
 bool DstRowValid[1024] = {true, ..., true};
 ```
 
-Note that the power-on reset state can result in reads of `UnpredictableValue()`. Software should scrub `Dst` at initialization time, preferably with an `SFPSTORE` of all 1024 rows to a known value, or minimally with a `ZEROACC` of all rows to clear `DstRowValid` to `false`.
+Note that the power-on reset state can result in reads of `UnpredictableValue()`. Software should scrub `Dst` at initialization time, preferably with an `SFPSTORE` of all 1024 rows to a known value, or minimally with a [`ZEROACC`](ZEROACC.md) of all rows to clear `DstRowValid` to `false`.
 
 Most of the time, `Dst16b[Row][Col]` is simple syntactic sugar for `DstBits[Adj16(Row)][Col]`.
 
@@ -38,7 +38,7 @@ uint10_t Adj32(uint10_t r) {
 }
 ```
 
-Note that `Config` in the above functions refers to Tensix backend configuration. In addition to their usage in these two functions, `Config.DEST_ACCESS_CFG_remap_addrs` and `Config.DEST_ACCESS_CFG_swizzle_32b` also affect how packers address `Dst`.
+Note that `Config` in the above functions refers to Tensix backend configuration. In addition to their usage in these two functions, `Config.DEST_ACCESS_CFG_remap_addrs` and `Config.DEST_ACCESS_CFG_swizzle_32b` also affect how packers address `Dst`. `Config.DEST_ACCESS_CFG_zeroacc_absolute_tile_mode` affects only [`ZEROACC`](ZEROACC.md).
 
 Each of the valid bits is indexed by physical row: an access to `Dst32b[Row]` consults `DstRowValid[Adj32(Row)]` (and does not consult `Adj32(Row) + 8`), whereas an access to `Dst16b[Row]` consults `DstRowValid[Adj16(Row)]`.
 
