@@ -183,7 +183,7 @@ The condition mask consists of 13 bits, named C0 (least significant bit) through
 
 ||Keep on waiting and blocking if...|
 |---|---|
-|**C0**|The Scalar Unit (ThCon) has any memory requests still outstanding for the current thread.|
+|**C0**|The Scalar Unit (ThCon) is still executing an instruction from the current thread, or has any memory requests still outstanding for the current thread.|
 |**C1**|The current thread has an instruction in any stage of Unpacker 0's pipeline.|
 |**C2**|The current thread has an instruction in any stage of Unpacker 1's pipeline.|
 |**C3**|The current thread has an instruction in any stage of the Packer pipeline.|
@@ -201,7 +201,7 @@ If multiple condition bits are set in the condition mask, then the `STALLWAIT` i
 
 ||Notes|
 |---|---|
-|**C0**|Can be used after `LOADIND` or `LOADREG` or `ATINCGET` to ensure that the memory request has completed and that the destination GPR contains the result.|
+|**C0**|Can be used after `LOADIND` or `LOADREG` or `ATINCGET` to ensure that the memory request has completed and that the destination GPR contains the result. On Blackhole, also needed between a Scalar Unit instruction and a subsequent instruction at another unit which consumes its result; see [Scalar Unit (ThCon)](ScalarUnit.md).|
 |**C1, C2**|The block mask should include bit B3 (or B0) to prevent new instructions from this thread flowing into the unpackers.|
 |**C3**|The block mask should include bit B2 (or B0) to prevent new instructions from this thread flowing into the packers.|
 |**C4**|The block mask should include bit B6 to prevent new instructions from this thread flowing into the Matrix Unit (FPU).|

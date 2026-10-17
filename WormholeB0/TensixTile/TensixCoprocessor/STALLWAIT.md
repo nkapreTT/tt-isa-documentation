@@ -172,7 +172,7 @@ The condition mask consists of 15 bits, named C0 (least significant bit) through
 
 ||Keep on waiting and blocking if...|
 |---|---|
-|**C0**|The Scalar Unit (ThCon) has any memory requests still outstanding for the current thread.|
+|**C0**|The Scalar Unit (ThCon) is still executing an instruction from the current thread, or has any memory requests still outstanding for the current thread.|
 |**C1**|The current thread has an instruction in any stage of Unpacker 0's pipeline.|
 |**C2**|The current thread has an instruction in any stage of Unpacker 1's pipeline.|
 |**C3**|The current thread has an instruction in any stage of Packer 0's pipeline.|
