@@ -1,0 +1,3 @@
+# `ELWMUL` (`Dst += SrcA * SrcB` element-wise)
+
+This document is shared with the Wormhole tree; see [`ELWMUL.md` in the Wormhole tree](../../../WormholeB0/TensixTile/TensixCoprocessor/ELWMUL.md). The functionality is similar, but not identical, between Wormhole and Blackhole.
