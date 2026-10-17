@@ -9,7 +9,7 @@
 ```c
 TT_GAPOOL(((/* bool */ FlipSrcB) << 1) +
             /* bool */ FlipSrcA,
-            0,
+            true,
             /* u2 */ AddrMod,
             false,
             /* u10 */ DstRow)
