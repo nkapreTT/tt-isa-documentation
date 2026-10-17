@@ -42,3 +42,7 @@ if (SizeSel == 0) {
 ## Performance
 
 This instruction usually takes two cycles, though it will take longer if [Configuration Unit](ConfigurationUnit.md) instructions (from any Tensix thread or any baby RISCV) are contending for write bandwidth to THCON configuration. The instruction occupies the [Scalar Unit (ThCon)](ScalarUnit.md) for the entire duration, and the issuing thread will be blocked from issuing subsequent instructions for the entire duration.
+
+## Instruction scheduling
+
+Software must ensure that the instruction immediately after `REG2FLOP` is not trying to consume the configuration written by the `REG2FLOP` instruction. A NOP instruction can be inserted to ensure this (any kind of Tensix NOP suffices, though plain `NOP` is conventional).
