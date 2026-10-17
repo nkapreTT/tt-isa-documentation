@@ -37,3 +37,5 @@ This instruction requires two cycles to execute, but is fully pipelined, so a `W
 ## Instruction scheduling
 
 Software must ensure that the instruction immediately after `WRCFG` is not trying to consume the configuration written by the `WRCFG` instruction. A NOP instruction can be inserted to ensure this (any kind of Tensix NOP suffices, though plain `NOP` is conventional).
+
+On Wormhole, if the consuming instruction is an unpacker instruction (e.g. `UNPACR`) and the configuration is one of the `THCON_` fields, then there need to be at least _two_ instructions between `WRCFG` and the consuming instruction.
