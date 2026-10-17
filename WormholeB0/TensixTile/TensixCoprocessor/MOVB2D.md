@@ -20,6 +20,10 @@ TT_MOVB2D(/* bool */ UseDst32bLo,
 
 ![](../../../Diagrams/Out/Bits32_MOVB2D.svg)
 
+On Blackhole, `AddrMod` is a `u3` rather than a `u2`, and the three modifier bits below it are one bit lower, giving this encoding:
+
+![](../../../Diagrams/Out/Bits32_MOVB2D_BH.svg)
+
 ## Functional model
 
 This instruction will, if necessary, spend time waiting at the Wait Gate before being dispatched to the Matrix Unit (FPU):

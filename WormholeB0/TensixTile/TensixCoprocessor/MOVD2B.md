@@ -18,6 +18,10 @@ TT_MOVD2B(/* bool */ UseDst32bLo,
 
 ![](../../../Diagrams/Out/Bits32_MOVD2B.svg)
 
+On Blackhole, `AddrMod` is a `u3` rather than a `u2`, giving this encoding:
+
+![](../../../Diagrams/Out/Bits32_MOVD2B_BH.svg)
+
 ## Functional model
 
 ```c

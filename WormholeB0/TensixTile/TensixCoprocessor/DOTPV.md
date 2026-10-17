@@ -19,6 +19,10 @@ TT_DOTPV(((/* bool */ FlipSrcB) << 1) +
 
 ![](../../../Diagrams/Out/Bits32_DOTPV.svg)
 
+On Blackhole, `AddrMod` is a `u3` rather than a `u2`, giving this encoding:
+
+![](../../../Diagrams/Out/Bits32_DOTPV_BH.svg)
+
 ## Functional model
 
 `DOTPV`'s functional model is identical to [`MVMUL`'s functional model](MVMUL.md#functional-model), except that `BroadcastSrcBRow` is always `false`.

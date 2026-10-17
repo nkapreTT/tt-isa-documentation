@@ -30,6 +30,10 @@ TT_ELWSUB(((/* bool */ FlipSrcB) << 1) +
 
 ![](../../../Diagrams/Out/Bits32_ELWSUB.svg)
 
+On Blackhole, `AddrMod` is a `u3` rather than a `u2`, giving this encoding:
+
+![](../../../Diagrams/Out/Bits32_ELWSUB_BH.svg)
+
 ## Functional model
 
 `ELWSUB`'s functional model is identical to [`ELWADD`'s functional model](ELWADD.md#functional-model), except that:

@@ -24,6 +24,8 @@ There is no syntax to specify `/* bool */ Revert`; if a non-zero value is desire
 
 ![](../../../Diagrams/Out/Bits32_ZEROACC.svg)
 
+On Blackhole, `ZEROACC` is encoded differently: `AddrMod` is a `u3` at bits 14 through 16, `Revert` is bit 17, `UseDst32b` is bit 18, and `Mode` is a `u3` at bits 19 through 21. Blackhole also has an extra `Mode` value, which this page does not describe.
+
 ## Functional model
 
 ```c

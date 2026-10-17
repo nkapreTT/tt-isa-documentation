@@ -16,6 +16,10 @@ TT_SHIFTXB(/* u2 */ AddrMod,
 
 ![](../../../Diagrams/Out/Bits32_SHIFTXB.svg)
 
+On Blackhole, `AddrMod` is a `u3` rather than a `u2`, giving this encoding:
+
+![](../../../Diagrams/Out/Bits32_SHIFTXB_BH.svg)
+
 ## Cross-lane data movement pattern
 
 When `ShiftInZero==false`:

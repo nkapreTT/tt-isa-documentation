@@ -16,13 +16,13 @@ The `[3]` is always indexed as `[CurrentThread]`, i.e. each Tensix thread has it
 
 Matrix Unit (FPU) and Vector Unit (SFPU) instructions use RWCs as auto-incrementing addressing counters: the initial values of `RWCs[CurrentThread].Dst` and `RWCs[CurrentThread].SrcA` and `RWCs[CurrentThread].SrcB` help to specify which row(s) of [`Dst`](Dst.md) and [`SrcA`](SrcASrcB.md) and [`SrcB`](SrcASrcB.md) the instruction accesses, and then the instruction can specify how to increment these counters in preparation for the next instruction. The same is true of `RWCs[CurrentThread].FidelityPhase`, albeit instead of specifying a row, it specifies which one of four possible fidelity phases are in use for multiplications performed by the Matrix Unit (FPU).
 
-There are not enough instruction bits to specify all of the required counter increments directly within an instruction, so a layer of indirection is used: an instruction uses two bits to specify an index into an array of pre-configured increments. These two bits are called the `AddrMod` bits, and the `ApplyAddrMod` function describes how these two bits are used:
+There are not enough instruction bits to specify all of the required counter increments directly within an instruction, so a layer of indirection is used: an instruction uses two bits (three on Blackhole) to specify an index into an array of pre-configured increments. These bits are called the `AddrMod` bits, and the `ApplyAddrMod` function describes how these bits are used:
 
 ```c
-void ApplyAddrMod(uint2_t AddrMod, bool UpdateFidelityPhase = true) {
+void ApplyAddrMod(uint3_t AddrMod, bool UpdateFidelityPhase = true) {
   auto& RWC = RWCs[CurrentThread];
   uint3_t Index = AddrMod;
-  if (RWC.ExtraAddrModBit || ThreadConfig[CurrentThread].ADDR_MOD_SET_Base) {
+  if (TTArchitecture == Wormhole && (RWC.ExtraAddrModBit || ThreadConfig[CurrentThread].ADDR_MOD_SET_Base)) {
     Index += 4;
   }
   auto& AB = ThreadConfig[CurrentThread].ADDR_MOD_AB_SEC[Index];
@@ -52,7 +52,7 @@ void ApplyAddrMod(uint2_t AddrMod, bool UpdateFidelityPhase = true) {
   else if (Bias.BiasIncr & 3) RWC.ExtraAddrModBit += 1;
 }
 
-void ApplyPartialAddrMod(uint2_t AddrMod) {
+void ApplyPartialAddrMod(uint3_t AddrMod) {
   ApplyAddrMod(AddrMod, /* UpdateFidelityPhase = */ false);
 }
 ```

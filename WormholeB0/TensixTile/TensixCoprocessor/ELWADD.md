@@ -30,6 +30,10 @@ TT_ELWADD(((/* bool */ FlipSrcB) << 1) +
 
 ![](../../../Diagrams/Out/Bits32_ELWADD.svg)
 
+On Blackhole, `AddrMod` is a `u3` rather than a `u2`, giving this encoding:
+
+![](../../../Diagrams/Out/Bits32_ELWADD_BH.svg)
+
 ## Functional model
 
 This instruction will, if necessary, spend time waiting at the Wait Gate before being dispatched to the Matrix Unit (FPU):

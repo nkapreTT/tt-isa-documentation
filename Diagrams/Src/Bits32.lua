@@ -488,11 +488,31 @@ local diagrams = {
       {24, 8, "0x08"},
     }
   end,
+  MOVD2A_BH = function()
+    return Bits32{
+      {0, 10, "DstRow"},
+      {13, 1, "Move4Rows", y = 2},
+      {14, 3, "AddrMod", y = 1, edge = "right"},
+      {17, 6, "SrcRow"},
+      {23, 1, "UseDst32bLo", y = 1},
+      {24, 8, "0x08"},
+    }
+  end,
   MOVD2B = function()
     return Bits32{
       {0, 10, "DstRow"},
       {13, 1, "Move4Rows", y = 2},
       {15, 2, "AddrMod", y = 1},
+      {17, 6, "SrcRow"},
+      {23, 1, "UseDst32bLo", y = 1},
+      {24, 8, "0x0A"},
+    }
+  end,
+  MOVD2B_BH = function()
+    return Bits32{
+      {0, 10, "DstRow"},
+      {13, 1, "Move4Rows", y = 2},
+      {14, 3, "AddrMod", y = 1, edge = "right"},
       {17, 6, "SrcRow"},
       {23, 1, "UseDst32bLo", y = 1},
       {24, 8, "0x0A"},
@@ -507,11 +527,30 @@ local diagrams = {
       {24, 8, "0x0B"},
     }
   end,
+  MOVB2A_BH = function()
+    return Bits32{
+      {0, 6, "SrcBRow"},
+      {13, 1, "Move4Rows", y = 2},
+      {14, 3, "AddrMod", y = 1, edge = "right"},
+      {17, 6, "SrcARow"},
+      {24, 8, "0x0B"},
+    }
+  end,
   MOVDBGA2D = function()
     return Bits32{
       {0, 10, "DstRow"},
       {13, 1, "Move8Rows", y = 2},
       {15, 2, "AddrMod", y = 1},
+      {17, 6, "SrcRow"},
+      {23, 1, "UseDst32bLo", y = 1},
+      {24, 8, "0x09"},
+    }
+  end,
+  MOVDBGA2D_BH = function()
+    return Bits32{
+      {0, 10, "DstRow"},
+      {13, 1, "Move8Rows", y = 2},
+      {14, 3, "AddrMod", y = 1, edge = "right"},
       {17, 6, "SrcRow"},
       {23, 1, "UseDst32bLo", y = 1},
       {24, 8, "0x09"},
@@ -537,6 +576,16 @@ local diagrams = {
       {24, 8, "0x12"},
     }
   end,
+  MOVA2D_BH = function()
+    return Bits32{
+      {0, 10, "DstRow"},
+      {13, 1, "Move8Rows", y = 2},
+      {14, 3, "AddrMod", y = 1, edge = "right"},
+      {17, 6, "SrcRow"},
+      {23, 1, "UseDst32bLo", y = 1},
+      {24, 8, "0x12"},
+    }
+  end,
   MOVB2D = function()
     return Bits32{
       {0, 10, "DstRow"},
@@ -544,6 +593,18 @@ local diagrams = {
       {13, 1, "Broadcast1RowTo8", y = 3},
       {14, 1, "Move4Rows", y = 2, edge = "right"},
       {15, 2, "AddrMod", y = 1, edge = "right"},
+      {17, 6, "SrcRow"},
+      {23, 1, "UseDst32bLo", y = 1},
+      {24, 8, "0x13"},
+    }
+  end,
+  MOVB2D_BH = function()
+    return Bits32{
+      {0, 10, "DstRow"},
+      {11, 1, "BroadcastCol0", y = 1, edge = "left"},
+      {12, 1, "Broadcast1RowTo8", y = 3},
+      {13, 1, "Move4Rows", y = 2, edge = "right"},
+      {14, 3, "AddrMod", y = 1, edge = "right"},
       {17, 6, "SrcRow"},
       {23, 1, "UseDst32bLo", y = 1},
       {24, 8, "0x13"},
@@ -560,10 +621,33 @@ local diagrams = {
       {24, 8, "0x27"},
     }
   end,
+  ELWMUL_BH = function()
+    return Bits32{
+      {0, 10, "DstRow"},
+      {14, 3, "AddrMod", y = 1},
+      {19, 1, "BroadcastSrcBCol0", y = 2, edge = "left"},
+      {20, 1, "BroadcastSrcBRow", y = 3},
+      {22, 1, "FlipSrcA", y = 2},
+      {23, 1, "FlipSrcB", y = 1, edge = "right"},
+      {24, 8, "0x27"},
+    }
+  end,
   ELWADD = function()
     return Bits32{
       {0, 10, "DstRow"},
       {15, 2, "AddrMod", y = 1},
+      {19, 1, "BroadcastSrcBCol0", y = 2, edge = "left"},
+      {20, 1, "BroadcastSrcBRow", y = 3, edge = "left"},
+      {21, 1, "AddDst", y = 4},
+      {22, 1, "FlipSrcA", y = 2, edge = "right"},
+      {23, 1, "FlipSrcB", y = 1, edge = "right"},
+      {24, 8, "0x28"},
+    }
+  end,
+  ELWADD_BH = function()
+    return Bits32{
+      {0, 10, "DstRow"},
+      {14, 3, "AddrMod", y = 1},
       {19, 1, "BroadcastSrcBCol0", y = 2, edge = "left"},
       {20, 1, "BroadcastSrcBRow", y = 3, edge = "left"},
       {21, 1, "AddDst", y = 4},
@@ -584,11 +668,33 @@ local diagrams = {
       {24, 8, "0x30"},
     }
   end,
+  ELWSUB_BH = function()
+    return Bits32{
+      {0, 10, "DstRow"},
+      {14, 3, "AddrMod", y = 1},
+      {19, 1, "BroadcastSrcBCol0", y = 2, edge = "left"},
+      {20, 1, "BroadcastSrcBRow", y = 3, edge = "left"},
+      {21, 1, "AddDst", y = 4},
+      {22, 1, "FlipSrcA", y = 2, edge = "right"},
+      {23, 1, "FlipSrcB", y = 1, edge = "right"},
+      {24, 8, "0x30"},
+    }
+  end,
   GMPOOL = function()
     return Bits32{
       {0, 10, "DstRow"},
       {14, 1, "ArgMax", y = 1, edge = "left"},
       {15, 2, "AddrMod", y = 2},
+      {22, 1, "FlipSrcA", y = 2},
+      {23, 1, "FlipSrcB", y = 1, edge = "right"},
+      {24, 8, "0x33"},
+    }
+  end,
+  GMPOOL_BH = function()
+    return Bits32{
+      {0, 10, "DstRow"},
+      {14, 1, "ArgMax", y = 1, edge = "left"},
+      {15, 3, "AddrMod", y = 2},
       {22, 1, "FlipSrcA", y = 2},
       {23, 1, "FlipSrcB", y = 1, edge = "right"},
       {24, 8, "0x33"},
@@ -623,6 +729,14 @@ local diagrams = {
       {24, 8, "0x18"},
     }
   end,
+  SHIFTXB_BH = function()
+    return Bits32{
+      {0, 6, "SrcRow"},
+      {10, 1, "ShiftInZero", y=1},
+      {14, 3, "AddrMod", y = 1, edge = "right"},
+      {24, 8, "0x18"},
+    }
+  end,
   CLREXPHIST = function()
     return Bits32{
       {24, 8, "0x21"},
@@ -638,6 +752,16 @@ local diagrams = {
       {24, 8, "0x26"},
     }
   end,
+  MVMUL_BH = function()
+    return Bits32{
+      {0, 10, "DstRow"},
+      {14, 3, "AddrMod", y = 1},
+      {19, 1, "BroadcastSrcBRow", y = 2, edge = "left"},
+      {22, 1, "FlipSrcA", y = 2, edge = "right"},
+      {23, 1, "FlipSrcB", y = 1, edge = "right"},
+      {24, 8, "0x26"},
+    }
+  end,
   DOTPV = function()
     return Bits32{
       {0, 10, "DstRow"},
@@ -647,10 +771,28 @@ local diagrams = {
       {24, 8, "0x29"},
     }
   end,
+  DOTPV_BH = function()
+    return Bits32{
+      {0, 10, "DstRow"},
+      {14, 3, "AddrMod", y = 1},
+      {22, 1, "FlipSrcA", y = 2, edge = "right"},
+      {23, 1, "FlipSrcB", y = 1, edge = "right"},
+      {24, 8, "0x29"},
+    }
+  end,
   GAPOOL = function()
     return Bits32{
       {0, 10, "DstRow"},
       {15, 2, "AddrMod", y = 1},
+      {22, 1, "FlipSrcA", y = 2, edge = "right"},
+      {23, 1, "FlipSrcB", y = 1, edge = "right"},
+      {24, 8, "0x34"},
+    }
+  end,
+  GAPOOL_BH = function()
+    return Bits32{
+      {0, 10, "DstRow"},
+      {15, 3, "AddrMod", y = 1},
       {22, 1, "FlipSrcA", y = 2, edge = "right"},
       {23, 1, "FlipSrcB", y = 1, edge = "right"},
       {24, 8, "0x34"},

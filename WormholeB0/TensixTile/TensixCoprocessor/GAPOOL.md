@@ -19,6 +19,10 @@ TT_GAPOOL(((/* bool */ FlipSrcB) << 1) +
 
 ![](../../../Diagrams/Out/Bits32_GAPOOL.svg)
 
+On Blackhole, `AddrMod` is a `u3` rather than a `u2`, giving this encoding:
+
+![](../../../Diagrams/Out/Bits32_GAPOOL_BH.svg)
+
 ## Functional model
 
 `GAPOOL`'s functional model is identical to [`MVMUL`'s functional model](MVMUL.md#functional-model), except that:
