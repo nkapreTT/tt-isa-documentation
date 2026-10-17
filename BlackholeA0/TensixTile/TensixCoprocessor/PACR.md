@@ -24,7 +24,7 @@ TT_PACR(/* u2 */ CfgContext, /* u3 */ RowPadZero, /* bool */ DstAccessMode,
 
 ### `Dst` read interfaces
 
-The packer has four `Dst` read interfaces. `ReadIntfSel` is a mask of which read interfaces to enable, and each enabled read interface reads one row of 16 datums from `Dst`. Read interface `i` always reads `Dst` row `(StartRow & ~3) | i`, where `StartRow` is the starting `Dst` row determined by the [input address generator](../../../WormholeB0/TensixTile/TensixCoprocessor/Packers/InputAddressGenerator.md), so all four read interfaces address the same aligned group of four `Dst` rows, and the enabled subset of them is selected relative to `StartRow`:
+The packer has four `Dst` read interfaces, and each enabled read interface reads one row of 16 datums from `Dst`. Read interface `i` always reads `Dst` row `(StartRow & ~3) | i`, where `StartRow` is the starting `Dst` row determined by the [input address generator](../../../WormholeB0/TensixTile/TensixCoprocessor/Packers/InputAddressGenerator.md), so all four read interfaces address the same aligned group of four `Dst` rows. `ReadIntfSel` is a mask relative to `StartRow`: hardware shifts it left by `StartRow & 3` to give the set of read interfaces to enable, so bit `k` of `ReadIntfSel` enables read interface `(StartRow & 3) + k`, which reads `Dst` row `StartRow + k`:
 
 ```c
 uint4_t ReadIntfMask = CurrentInstruction.ReadIntfSel;
@@ -32,9 +32,9 @@ if (ReadIntfMask == 0) ReadIntfMask = 0b1111; // as a special case, 0 enables al
 if ((ReadIntfMask << (StartRow & 3)) > 0b1111) {
   UndefinedBehavior(); // every enabled read interface has to stay within the group of four
 }
-for (unsigned i = 0; i < 4; ++i) {
-  if (ReadIntfMask & (1 << i)) {
-    CurrentPacker.ReadDstRow((StartRow & ~3) | i); // appended to the packed output
+for (unsigned k = 0; k < 4; ++k) {
+  if (ReadIntfMask & (1 << k)) {
+    CurrentPacker.ReadDstRow(StartRow + k); // appended to the packed output
   }
 }
 ```
