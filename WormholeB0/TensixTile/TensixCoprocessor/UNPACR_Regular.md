@@ -322,6 +322,9 @@ uint2_t ThrottleMode = ConfigState.THCON_SEC[WhichUnpacker].REG2_Throttle_mode;
 if ((TTArchitecture == Wormhole) && (ThrottleMode > 2)) {
   UndefinedBehavior(); // x8 ThrottleMode is illegal on Wormhole
 }
+if ((TTArchitecture == Blackhole) && ConfigState.THCON_SEC[0].REG1_ovrd_default_throttle_mode && (ThrottleMode == 3) && (InDataFormat == BFP4 || InDataFormat == BFP4a)) {
+  UndefinedBehavior(); // x8 ThrottleMode with BFP4a/BFP4 can hang the unpacker on Blackhole
+}
 if (!UnpackToDst && (WhichUnpacker == 0) && (InputNumDatums > 16)) { // check for SrcA burst drop cases
   // This logic is mildly simplified and conservative vs. exact (rather complex) silicon behavior
   uint32_t StartRow = OutAddr / 16 - 4;
