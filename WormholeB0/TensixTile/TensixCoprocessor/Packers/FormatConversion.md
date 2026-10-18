@@ -133,9 +133,7 @@ The early format conversion is configured using a variety of configuration field
     * Set `IntermediateFormat = BF16` and `Round_10b_mant = true` (this choice can only be used if the late conversion is from TF32 to FP16, and if available, is the preferred choice for efficiency reasons).
   * **To BF16:**
     * **Rounding (i.e. flush denormals to zero and NaN to infinity):** Set `IntermediateFormat = BF16` and `Read_raw = false`. If the late conversion is from BF16 to FP16, also set `Round_10b_mant = false`.
-    * **Identity (i.e. preserve denormals and NaN):** Set `Read_raw = true`, then choose either of:
-      * Set `IntermediateFormat = BFP8`.
-      * Set `IntermediateFormat = BF16`. If the late conversion is from BF16 to FP16, also set `Round_10b_mant = false`.
+    * **Identity (i.e. preserve denormals and NaN):** Set `IntermediateFormat = BF16` and `Read_raw = true`. If the late conversion is from BF16 to FP16, also set `Round_10b_mant = false`. Note that setting `IntermediateFormat = BFP8` and `Read_raw = true` is _not_ an identity: it preserves every other value, but turns negative zero into negative infinity.
   * **To E8M6:** Set `IntermediateFormat = BFP8` and `Read_raw = false`.
   * **To INT8 (sign bit only):** Set `IntermediateFormat = INT8` and `Read_unsigned = false` and `Read_raw = true`.
 * **From FP16:** Set `Read_32b_data = false`, then:
