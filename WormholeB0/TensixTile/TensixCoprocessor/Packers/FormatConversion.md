@@ -64,6 +64,43 @@ The late format conversion takes one of the supported intermediate formats, and 
 
 Where rounding happens in BFP conversions, it can either be deterministic round-to-nearest with ties away from zero, or stochastic (though due to a hardware bug, stochastic rounding has a slight bias towards increasing the magnitude rather than being 50:50, and can even sometimes increase the magnitude of values which do not require rounding).
 
+With deterministic rounding, each group of 16 datums is converted from BF16 to BFP8, and then possibly truncated to BFP4 or BFP2, using the following logic:
+
+```c
+void BF16ToBFP8(const uint16_t Datums[16], uint8_t* SharedExp, uint8_t BFP8[16]) {
+  uint8_t MaxExp = 0;
+  for (unsigned i = 0; i < 16; ++i) {
+    uint8_t Exp = (Datums[i] >> 7) & 0xff;
+    if (Exp > MaxExp) MaxExp = Exp; // NB: Exp == 255 is not special
+  }
+  *SharedExp = MaxExp;
+  for (unsigned i = 0; i < 16; ++i) {
+    uint8_t Sign = Datums[i] >> 15;
+    uint8_t Exp = (Datums[i] >> 7) & 0xff;
+    uint8_t Man = (Datums[i] & 0x7f) | (Exp ? 0x80 : 0);
+    unsigned Shift = MaxExp - Exp;
+    uint8_t Mag = 0;
+    if (Shift < 8) {
+      Mag = (Man + (1u << Shift)) >> (Shift + 1); // Round to nearest, ties away from zero
+      if (Mag == 128) Mag = 127; // Clamp rather than renormalize
+    }
+    BFP8[i] = Mag ? ((Sign << 7) | Mag) : 0; // Never 0x80
+  }
+}
+
+uint4_t BFP8ToBFP4(uint8_t BFP8) {
+  uint8_t Mag = (BFP8 & 0x7f) >> 4;
+  return Mag ? (((BFP8 >> 7) << 3) | Mag) : 0;
+}
+
+uint2_t BFP8ToBFP2(uint8_t BFP8) {
+  uint8_t Mag = (BFP8 & 0x7f) >> 6;
+  return Mag ? (((BFP8 >> 7) << 1) | Mag) : 0;
+}
+```
+
+The shared exponent is the largest exponent in the group, with infinity and NaN treated as normal values with exponent 255, so +∞ and -∞ become `0x40` and `0xC0` with a shared exponent of 255 (which [convert back](../FloatBitPatterns.md#conversion-routines) to +∞ and -∞). A negative datum whose magnitude rounds or truncates to zero becomes +0. The above assumes that the only datum with an exponent of zero is +0, as is the case after any rounding early format conversion; other datums with an exponent of zero are not yet documented here.
+
 The late format conversion sometimes preserves denormals, and sometimes flushes them, depending on the nature of the late format conversion:
 
 <table><thead><tr><th/><th>Mantissa widens</th><th>Mantissa stays same width</th><th>Mantissa narrows</th></tr></thead>
