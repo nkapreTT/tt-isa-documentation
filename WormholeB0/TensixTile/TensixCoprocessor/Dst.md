@@ -87,6 +87,8 @@ The Matrix Unit (FPU) can move from Dst to SrcA (`MOVD2A`) and from Dst to SrcB 
 
 After issuing an instruction which writes to `Dst`, then for the next five cycles, the aligned 8x16 block of `Dst` containing that write cannot be read. If a thread presents a Matrix Unit (FPU) or [`PACR`](PACR.md) instruction which wants to read from that block, then hardware will automatically stall the thread for an appropriate number of cycles. In particular, for instructions which accumulate onto `Dst` (such as [`MVMUL`](MVMUL.md), [`GAPOOL`](GAPOOL.md), [`DOTPV`](DOTPV.md), [`GMPOOL`](GMPOOL.md), [`ELWMUL`](ELWMUL.md)), software needs to be looping over at least six distinct 8x16 blocks of `Dst` to avoid being stalled. Additionally, if using multiple fidelity phases, with one loop over blocks of `Dst` and one loop over fidelity phases, then the fidelity loop should be the _outer_ loop to avoid being stalled.
 
+If an [`SFPSTORE`](SFPSTORE.md) writes to `Dst` in the same cycle as a Matrix Unit (FPU) instruction writes to the same half of `Dst`, the Matrix Unit (FPU) instruction's write can be lost; see [`SFPSTORE`'s instruction scheduling](SFPSTORE.md#instruction-scheduling).
+
 ## Pseudocode helpers
 
 The following pseudocode routines are shared across the various units that access `Dst`.
