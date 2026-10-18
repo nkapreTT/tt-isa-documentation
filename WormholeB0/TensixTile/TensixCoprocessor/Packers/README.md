@@ -12,7 +12,7 @@ In its most basic configuration, with all optional features disabled, each packe
 * [Exponent thresholding](ExponentThresholding.md), to replace values close to zero with zero.
 * [Downsampling](Downsampling.md), to select a non-contiguous range of datums from `Dst`.
 * [Compression](Compression.md), to allow data containing lots of zeroes to take up less space in L1 (though attempting to compress data which _doesn't_ contain lots of zeroes will instead cause it to take up _more_ space in L1).
-* Accumulation, to perform `L1 += Datum` rather than `L1 = Datum`.
+* [Accumulation](Accumulation.md), to perform `L1 += Datum` rather than `L1 = Datum`.
 
 It is usually the case that all four packers are instructed at once, each one moving a distinct range of `Dst` to a distinct range of L1.
 
