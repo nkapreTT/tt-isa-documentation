@@ -17,7 +17,7 @@ If fetching datums from `Dst` (as is usually the case), the early format convers
 |**To E5M6**|No|No|Rounding|No|No|
 |**To FP8 (e5m2)**|No (keep as FP32 then use late conversion)|No (keep as BF16 then use late conversion)|Truncation|No|No|
 |**To INT32 (e0m31)**|Bitcast|No|No|Identity|No|
-|**To INT16 (e0m15)**|No|No|No|No|Identity|
+|**To INT16 (e0m15)**|Top 16 bits|No|No|Top 16 bits|Identity|
 |**To INT8 (e0m7)**|Sign bit and low 7 bits of mantissa|Sign bit only, other bits zero|Sign bit only, other bits zero|Shift then round then saturate (-127 to +127), or sign bit and low 7 bits of magnitude|No|
 |**To UINT8**|Low 8 bits of mantissa|No|No|Shift then round then saturate (0 to 255), or low 8 bits of magnitude|No|
 
@@ -157,6 +157,7 @@ The early format conversion is configured using a variety of configuration field
       * Set `IntermediateFormat = BFP8`.
       * Set `IntermediateFormat = BF16`. If the late conversion is from BF16 to FP16, also set `Round_10b_mant = false`.
   * **To E8M6:** Set `IntermediateFormat = BFP8` and `Read_raw = false`.
+  * **To INT16:** Set `IntermediateFormat = INT16`. The top 16 bits of each 32-bit datum pass through unchanged, as opaque data: no conversion, rounding or saturation.
   * **To INT8:** Set `IntermediateFormat = INT8` and `Read_unsigned = false`. Then:
     * **Sign bit and low seven bits:** Set `Read_raw = true`.
     * **Shifting, rounding, and saturating:** Set `Read_raw = false`. Set the low five bits of `ShiftAmount` to the desired right-shift amount; note that this shifts the magnitude right, leaves the sign bit as-is, and fills the gap with zeros. The shifted-out bits (if any) are used for rounding.
