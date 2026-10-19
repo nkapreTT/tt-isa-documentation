@@ -114,6 +114,10 @@ Note the `(Addr & 0x1ffff) << 4` as part of all the assignments to `ByteAddress`
 
 When one of these buffers writes 16 bytes to L1, `ByteAddress` will be incremented by 16.
 
+## Exponent section
+
+A BFP pack's exponent stream starts `Exp_section_size` 16-byte units before its data stream, and receives one byte per 16 datums until the next `Last` or `Flush`. If more exponents than fit in those `Exp_section_size * 16` bytes are written, the exponent stream runs into the data stream, and every byte of L1 that both streams write contains an `UnpredictableValue`.
+
 ## `NeedsNewAddress`
 
 Per the code in the functional model, output addresses are only changed when `NeedsNewAddress` is true. If `NeedsNewAddress` is false, then `ByteAddress` is not changed: output data will be appended to the pre-existing address. On reset, `NeedsNewAddress` will be true, and if `CurrentInstruction.Last` or `CurrentInstruction.Flush` is set, then `NeedsNewAddress` will be set to true at the _end_ of executing the instruction, meaning that `NeedsNewAddress` will be true for the _next_ instruction. If `CurrentInstruction.Last` or `CurrentInstruction.Flush` is set, then the output buffers sitting before L1 will be flushed: any buffer containing data will be padded with zeroes until it contains 16 bytes, then the 16 bytes will be written out to L1. Note that while `Last` and `Flush` are equivalent for the output address generator, they are not equivalent in the input address generator.
