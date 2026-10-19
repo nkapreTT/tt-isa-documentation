@@ -58,6 +58,10 @@ Masks with three bits set are useful for packing a tensor whose final group of r
 
 The tile position used for [edge masking](Packers/EdgeMasking.md) advances by the number of enabled read interfaces per `PACR`, not by the number of datums each of them read, with the `k`'th enabled read interface (counting only enabled interfaces) using tile row position `TilePosition + YStart + k`, where `YStart` (usually zero) depends on the packer's `Dst` offset. `TilePosition` is an 8 bit counter whose low four bits give the tile row; it returns to zero, starting the next xy plane, only when advancing it lands exactly on `PACK_COUNTERS_SEC0_pack_reads_per_xy_plane`, so if the number of enabled read interfaces does not divide the configured rows per xy plane, the counter steps over that value and keeps incrementing instead.
 
+### Output held until the next `PACR`
+
+A `PACR` with `Last` clear, an `IntermediateFormat` of FP32 or INT32 and three or four enabled read interfaces (e.g. `ReadIntfSel` of `0b0111`, `0b1111` or `0`) keeps its output inside the packer until the next `PACR` starts, and until then the instruction counts as still being in the packer pipeline. A [`STALLWAIT`](STALLWAIT.md) on the same thread that waits for the packer (wait condition C3) between the two is therefore UndefinedBehavior: in practice it never finishes. Ending the sequence with a `PACR` that has `Last` set avoids it.
+
 ### Instruction fields
 
 * `ReadIntfSel`: as above.
