@@ -337,6 +337,13 @@ if ((TTArchitecture == Blackhole) && ConfigState.THCON_SEC[0].REG1_ovrd_default_
   // and 32-bit input writes only half of its rows.
   UndefinedBehavior();
 }
+if ((TTArchitecture == Blackhole) && BfpExpStream && (DatumSizeBytes == 0.5) && (ThrottleMode >= 2 || !ConfigState.THCON_SEC[0].REG1_ovrd_default_throttle_mode)) {
+  // At x4 (the default for BFP4a/BFP4), a run that starts partway into a group of 16 exponents
+  // must end within that group; otherwise datums past the group boundary can get the wrong exponents.
+  if ((FirstDatum % 256) != 0 && FirstDatum + InputNumDatums > (FirstDatum / 256 + 1) * 256) {
+    UndefinedBehavior();
+  }
+}
 if (!UnpackToDst && (WhichUnpacker == 0) && (InputNumDatums > 16)) { // check for SrcA burst drop cases
   // This logic is mildly simplified and conservative vs. exact (rather complex) silicon behavior
   uint32_t StartRow = OutAddr / 16 - 4;
