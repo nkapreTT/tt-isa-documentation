@@ -8,7 +8,7 @@ If fetching datums from `Dst` (as is usually the case), the early format convers
 
 ||From FP32 (e8m23)|From BF16 (e8m7)|From FP16 (e5m10)|From INT32 (e0m31)|From INT16 (e0m15)|
 |:-:|---|---|---|---|---|
-|**To FP32 (e8m23)**|Identity|No (keep as BF16 then use late conversion, or go via TF32)|No (keep as FP16 then use late conversion)|Bitcast|No|
+|**To FP32 (e8m23)**|Identity|Identity on Blackhole; on Wormhole, no (keep as BF16 then use late conversion, or go via TF32)|No (keep as FP16 then use late conversion)|Bitcast|No|
 |**To TF32 (e8m10)**|Rounding|Rounding (though more efficient to keep as BF16 then use late conversion)|No (keep as FP16 then use late conversion)|Bitcast to FP32 then rounding|No|
 |**To BF16 (e8m7)**|Rounding or truncation|Rounding or identity|No (keep as FP16 then use late conversion)|Bitcast of top 16 bits|No|
 |**To E8M6**|Rounding|Rounding|No|No|No|
@@ -172,6 +172,7 @@ The early format conversion is configured using a variety of configuration field
     * **Rounding (i.e. flush denormals to zero and NaN to infinity):** Set `IntermediateFormat = BF16` and `Read_raw = false`. If the late conversion is from BF16 to FP16, also set `Round_10b_mant = false`.
     * **Identity (i.e. preserve denormals and NaN):** Set `IntermediateFormat = BF16` and `Read_raw = true`. If the late conversion is from BF16 to FP16, also set `Round_10b_mant = false`. Note that setting `IntermediateFormat = BFP8` and `Read_raw = true` is _not_ an identity: it preserves every other value, but turns negative zero into negative infinity.
   * **To E8M6:** Set `IntermediateFormat = BFP8` and `Read_raw = false`.
+  * **To FP32 (Blackhole only):** Set `IntermediateFormat = FP32`, `Round_10b_mant = false` and `Read_raw = false`. This is an identity: each BF16 datum is widened to FP32 with zero low mantissa bits, keeping NaN payloads, denormals and negative zero.
   * **To INT8 (sign bit only):** Set `IntermediateFormat = INT8` and `Read_unsigned = false` and `Read_raw = true`.
 * **From FP16:** Set `Read_32b_data = false`, then:
   * **To FP16:** Set `IntermediateFormat = FP16`.
