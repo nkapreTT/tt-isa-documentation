@@ -12,7 +12,7 @@ If fetching datums from `Dst` (as is usually the case), the early format convers
 |**To TF32 (e8m10)**|Rounding|Rounding (though more efficient to keep as BF16 then use late conversion)|No (keep as FP16 then use late conversion)|Bitcast to FP32 then rounding|No|
 |**To BF16 (e8m7)**|Rounding or truncation|Rounding or identity|No (keep as FP16 then use late conversion)|Bitcast of top 16 bits|No|
 |**To E8M6**|Rounding|Rounding|No|No|No|
-|**To FP16 (e5m10)**|No (keep as FP32 then use late conversion, or round to TF32 then use late conversion)|No (keep as BF16 then use late conversion)|Rounding or identity|No|No|
+|**To FP16 (e5m10)**|Rounding or truncation to TF32 then exponent narrowing on Blackhole; on Wormhole, no (keep as FP32 then use late conversion, or round to TF32 then use late conversion)|Exponent narrowing on Blackhole; on Wormhole, no (keep as BF16 then use late conversion)|Rounding or identity|No|No|
 |**To E5M7**|No|No|Truncation|No|No|
 |**To E5M6**|No|No|Rounding|No|No|
 |**To FP8 (e5m2)**|No (keep as FP32 then use late conversion)|No (keep as BF16 then use late conversion)|Truncation|No|No|
@@ -27,6 +27,20 @@ Handling of denormals and NaNs in the early format conversion depends on the nat
 * **Identity / bitcast:** Denormals preserved. NaN preserved.
 * **Rounding:** Denormals flushed to zero. Minus zero converted to positive zero. If the exponent is 8 bits wide, NaN becomes infinity (this is a potentially surprising behavior). When rounding from FP32 to BF16, the flush happens _after_ rounding: the FP32 bit pattern is rounded (which can carry from the mantissa into the exponent), and then the result is flushed to positive zero if its exponent is zero. Consequently, with deterministic rounding, FP32 denormals with a mantissa of at least `0x7F8000` become the smallest BF16 normal of the same sign (`0x0080` or `0x8080`), whereas all other FP32 denormals become positive zero. Rounding to E8M6 likewise flushes after rounding: with deterministic rounding, FP32 denormals with a mantissa of at least `0x7F0000` and BF16 denormals with a mantissa of `0x7F` become the smallest E8M6 normal of the same sign, whereas all other denormals become positive zero.
 * **Truncation:** Denormals can become zero, if that is the outcome of truncating mantissa bits. NaN can become infinity, if that is the outcome of truncating mantissa bits.
+* **Exponent narrowing (Blackhole only):** The datum has an 8-bit exponent and a 10-bit mantissa: from FP32, the TF32 result of the rounding (which flushes denormals and minus zero to positive zero and turns NaN into infinity) or of the truncation (which keeps them); from BF16, the BF16 datum with three zero bits appended to its mantissa. Its exponent is then narrowed to 5 bits without rounding:
+
+```c
+uint16_t NarrowToFP16(uint19_t x) { // Sign, 8-bit exponent, 10-bit mantissa
+  uint1_t Sign = x >> 18;
+  int32_t Exp = ((x >> 10) & 0xff) - 112;
+  uint10_t Man = x & 0x3ff;
+  if (Exp < 0) return Sign << 15;              // Zero, keeping the sign
+  if (Exp > 31) return (Sign << 15) | 0x7fff;  // Saturate, including infinity and NaN
+  return (Sign << 15) | (Exp << 10) | Man;
+}
+```
+
+  An input in range <code>2<sup>-15</sup> ≤ |x| &lt; 2<sup>-14</sup></code> thus keeps its mantissa bits under an exponent field of zero, losing its implicit leading one, as the late conversion from FP32 to FP16 does.
 
 -----
 
@@ -109,6 +123,21 @@ The late format conversion sometimes preserves denormals, and sometimes flushes 
 <tr><th align="left">Exponent narrows</th><td colspan="3">Denormal inputs flushed to zero, as are inputs in range <code>|x| &lt; 2<sup>-15</sup></code>, but inputs in range <code>2<sup>-15</sup> ≤ |x| &lt; 2<sup>-14</sup></code> are mishandled; software should either ensure inputs are not in this range, or ensure that the subsequent consumer of FP16 data treats FP16 denormals as zero. Converting FP32 to FP16, the flushed inputs become zero with the sign kept, and an input <code>(1 + f) × 2<sup>-15</sup></code> in the mishandled range keeps the top ten bits of <code>f</code> under an exponent field of zero, losing its implicit leading one, i.e. it becomes <code>f × 2<sup>-14</sup></code> truncated</td></tr>
 </table>
 
+On Blackhole, setting `Pac_LF8_4b_exp = true` makes FP8 in `LateToFormat` mean e4m3 (1 sign bit, 4 bit exponent with a bias of 7, 3 bit mantissa) rather than e5m2. The late conversion from FP16 to e4m3 is then:
+
+```c
+uint8_t FP16ToE4M3(uint16_t x) {
+  uint1_t Sign = x >> 15;
+  uint5_t Exp = (x >> 10) & 0x1f;
+  uint10_t Man = x & 0x3ff;
+  if (Exp < 8) return Sign << 7;                         // Zero, keeping the sign
+  if (Exp >= 24) return (Sign << 7) | 0x7f;              // Saturate
+  return (Sign << 7) | ((Exp - 8) << 3) | (Man >> 7);    // Truncate
+}
+```
+
+An input in range <code>2<sup>-7</sup> ≤ |x| &lt; 2<sup>-6</sup></code> keeps the top three bits of its mantissa under an exponent field of zero, losing its implicit leading one. An exponent field of 15 is an ordinary exponent: e4m3 as packed has no infinity or NaN.
+
 In some cases, the early format conversion will already have flushed the problematic ranges to zero. To cover the remaining cases, the [exponent thresholding](ExponentThresholding.md) feature of the packer can be used to ensure that problematic ranges have been flushed to zero long before reaching the late format conversion.
 
 The late format conversion sometimes preserves NaNs, and sometimes replaces them with infinity, depending on the nature of the late format conversion:
@@ -126,7 +155,7 @@ The final L1 output format will be one of:
 * **TF32:** Like regular IEEE754 FP32, but with mantissa reduced to just 10 bits. 32 bits per datum, of which the top 19 bits are meaningful, and the low 13 bits are always zero.
 * **BF16:** Like regular IEEE754 FP32, but with mantissa reduced to just 7 bits. 16 bits per datum.
 * **FP16:** Like IEEE754 FP16 for normal values, but different bit pattern for infinity, and no bit patterns meaning NaN. See [FP16 bit patterns](../FloatBitPatterns.md#fp16) for details. 16 bits per datum.
-* **FP8:** For normal values, like IEEE754 FP16, but with mantissa reduced to just 2 bits (i.e. e5m2). Different bit pattern for infinity, and no bit patterns meaning NaN. Encoding follows the [FP16 bit patterns](../FloatBitPatterns.md#fp16), but with mantissa reduced to just 2 bits. 8 bits per datum.
+* **FP8:** For normal values, like IEEE754 FP16, but with mantissa reduced to just 2 bits (i.e. e5m2). Different bit pattern for infinity, and no bit patterns meaning NaN. Encoding follows the [FP16 bit patterns](../FloatBitPatterns.md#fp16), but with mantissa reduced to just 2 bits. 8 bits per datum. On Blackhole with `Pac_LF8_4b_exp = true`, e4m3 instead, as described above.
 * **BFP8 / BFP4 / BFP2:** Either 8 or 4 or 2 bits per datum, of which the high bit is a sign bit and the remaining bits are magnitude (not mantissa, because there's no implicit `1` bit). Each group of 16 datums then shares a single 8-bit exponent, which is interpreted similar to FP32.
 * **BFP8a / BFP4a / BFP2a:** Either 8 or 4 or 2 bits per datum, of which the high bit is a sign bit and the remaining bits are magnitude (not mantissa, because there's no implicit `1` bit). Each group of 16 datums then shares a single 5-bit exponent, which is interpreted similar to FP16, and is zero-extended to 8 bits for storage in memory.
 * **INT32:** This is a sign-magnitude format (not a two's complement format) with one sign bit and 31 magnitude bits.
@@ -157,6 +186,7 @@ The early format conversion is configured using a variety of configuration field
       * Set `IntermediateFormat = BFP8`.
       * Set `IntermediateFormat = BF16`. If the late conversion is from BF16 to FP16, also set `Round_10b_mant = false`.
   * **To E8M6:** Set `IntermediateFormat = BFP8` and `Read_raw = false`.
+  * **To FP16 (Blackhole only):** Set `IntermediateFormat = FP16` and `Round_10b_mant = true`. Then set `Read_raw = false` to round to TF32, or `Read_raw = true` to truncate to TF32, before the exponent narrowing.
   * **To INT16:** Set `IntermediateFormat = INT16`. The top 16 bits of each 32-bit datum pass through unchanged, as opaque data: no conversion, rounding or saturation.
   * **To INT8:** Set `IntermediateFormat = INT8` and `Read_unsigned = false`. Then:
     * **Sign bit and low seven bits:** Set `Read_raw = true`.
@@ -173,6 +203,7 @@ The early format conversion is configured using a variety of configuration field
     * **Rounding (i.e. flush denormals to zero and NaN to infinity):** Set `IntermediateFormat = BF16` and `Read_raw = false`. If the late conversion is from BF16 to FP16, also set `Round_10b_mant = false`.
     * **Identity (i.e. preserve denormals and NaN):** Set `IntermediateFormat = BF16` and `Read_raw = true`. If the late conversion is from BF16 to FP16, also set `Round_10b_mant = false`. Note that setting `IntermediateFormat = BFP8` and `Read_raw = true` is _not_ an identity: it preserves every other value, but turns negative zero into negative infinity.
   * **To E8M6:** Set `IntermediateFormat = BFP8` and `Read_raw = false`.
+  * **To FP16 (Blackhole only):** Set `IntermediateFormat = FP16` and `Round_10b_mant = true`. This is the exponent narrowing, with no rounding.
   * **To FP32 (Blackhole only):** Set `IntermediateFormat = FP32`, `Round_10b_mant = false` and `Read_raw = false`. This is an identity: each BF16 datum is widened to FP32 with zero low mantissa bits, keeping NaN payloads, denormals and negative zero.
   * **To INT8 (sign bit only):** Set `IntermediateFormat = INT8` and `Read_unsigned = false` and `Read_raw = true`.
 * **From FP16:** Set `Read_32b_data = false`, then:
@@ -220,6 +251,7 @@ uint1_t StateID = ThreadConfig[CurrentThread].CFG_STATE_ID_StateID;
 
 LateFromFormat is CurrentPacker.Config[StateID].In_data_format;
 LateToFormat   is CurrentPacker.Config[StateID].Out_data_format;
+Pac_LF8_4b_exp is CurrentPacker.Config[StateID].Pac_LF8_4b_exp; // Blackhole only
 ```
 
 It is usually the case that `IntermediateFormat` and `LateFromFormat` should be set to the same value. All three of `IntermediateFormat` and `LateFromFormat` and `LateToFormat` are 4-bit fields, with the encoding of data type names being:
