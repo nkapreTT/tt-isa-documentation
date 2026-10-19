@@ -53,3 +53,9 @@ float ReLUStage(float x) {
 Note that `STACC_RELU_ReluThreshold` can be interpreted as either BF16 or FP16. When `IntermediateFormat` is FP32, `STACC_RELU_ReluThreshold` will be interpreted as BF16, which has the same bit layout as the top 16 bits of FP32.
 
 `ReLUStage` is described as operating on floats (FP32). If `IntermediateFormat` is some narrower floating-point format, the values will be losslessly converted up to FP32 before `ReLUStage` and converted back down afterwards. If `IntermediateFormat` is an integer format, `STACC_RELU_ApplyRelu` should be set to zero, which will guarantee the values pass through `ReLUStage` unchanged, or set to one, which will pass through positive integers unchanged and replace negative integers with zero.
+
+On Blackhole, with `IntermediateFormat` FP16 and `PCK_DEST_RD_CTRL_Round_10b_mant` set (the early format conversion from FP32 or BF16 to FP16; see [format conversion](FormatConversion.md)), `ReLUStage` operates on the 8-bit-exponent value before its exponent is narrowed, and `STACC_RELU_ReluThreshold` is interpreted as BF16 rather than FP16.
+
+On Blackhole, `MIN_THRESHOLD_RELU` does not always replace a datum equal to `Threshold` with zero in columns 0 through 7 of `Dst`:
+* With `IntermediateFormat` FP16 and `PCK_DEST_RD_CTRL_Round_10b_mant` clear, such a datum is kept if the low three bits of `STACC_RELU_ReluThreshold` are not all zero.
+* With `IntermediateFormat` FP16, `PCK_DEST_RD_CTRL_Round_10b_mant` set and `PCK_DEST_RD_CTRL_Read_32b_data` clear, whether such a datum is kept depends on other contents of `Dst`.
