@@ -626,6 +626,23 @@ uint16_t BFP8aToFP16(uint8_t DatumBits, uint8_t ExpBits) {
   }
 }
 
+uint16_t FP32ToFP16(uint32_t x) {
+  // The mantissa is truncated, not rounded.
+  uint16_t Sign = (x >> 16) & 0x8000;
+  int32_t Exp = ((x >> 23) & 0xff) - 112;
+  if (Exp < 0) {
+    // Too small, including zero and denormals: becomes zero (keeping the sign).
+    return Sign;
+  } else if (Exp > 31) {
+    // Too large, including infinity and NaN: saturates to the largest magnitude.
+    return Sign | 0x7fff;
+  } else {
+    // Exp == 0 keeps the mantissa, so inputs in 2^-15 <= |x| < 2^-14 come out as an
+    // FP16 denormal bit pattern whose value is not that of the input.
+    return Sign | (Exp << 10) | ((x >> 13) & 0x3ff);
+  }
+}
+
 uint19_t WriteSrcTF32(uint19_t x) {
   // Rearrange fields from Sign,Exp,Man to Sign,Man,Exp as Src holds
   // TF32 data in this rearranged form.
