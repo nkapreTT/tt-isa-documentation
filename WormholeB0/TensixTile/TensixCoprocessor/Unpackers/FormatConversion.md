@@ -17,6 +17,8 @@ The available unpacker format conversions vary slightly based on whether unpacki
 > (†) Each datum is either 8 or 4 or 2 bits in L1. Exponents usually come from a separate array in L1 containing one exponent value per 16 datums, though the unpack instruction can instead opt to provide a fixed exponent for all datums.
 >
 > (‡) Like IEEE754 for normal values, but different bit pattern for infinity, and no bit patterns meaning NaN. See [FP16 bit patterns](../FloatBitPatterns.md#fp16) for details.
+>
+> On Blackhole, FP8 can instead mean e4m3 (1 sign bit, 4 bit exponent, 3 bit mantissa), selected per unpacker by `THCON_SEC0.REG1_Unp_LF8_4b_exp` or `THCON_SEC1.REG1_Unp_LF8_4b_exp`. In either form, Blackhole converts an FP8 datum whose exponent and mantissa bits are all ones to FP16 with a mantissa of all ones. The exact conversion is in [`UNPACR`'s functional model](../UNPACR_Regular.md#functional-model).
 
 ## Configuring the conversion
 
