@@ -160,10 +160,10 @@ The early format conversion is configured using a variety of configuration field
   * **To INT16:** Set `IntermediateFormat = INT16`. The top 16 bits of each 32-bit datum pass through unchanged, as opaque data: no conversion, rounding or saturation.
   * **To INT8:** Set `IntermediateFormat = INT8` and `Read_unsigned = false`. Then:
     * **Sign bit and low seven bits:** Set `Read_raw = true`.
-    * **Shifting, rounding, and saturating:** Set `Read_raw = false`. Set the low five bits of `ShiftAmount` to the desired right-shift amount; note that this shifts the magnitude right, leaves the sign bit as-is, and fills the gap with zeros. The shifted-out bits (if any) are used for rounding.
+    * **Shifting, rounding, and saturating:** Set `Read_raw = false`. Set the low five bits of `ShiftAmount` to the desired right-shift amount; note that this shifts the magnitude right, leaves the sign bit as-is, and fills the gap with zeros. The shifted-out bits (if any) are used for rounding. A result whose magnitude is zero is +0, even if the input was negative.
   * **To UINT8:** Set `IntermediateFormat = INT8` and `Read_unsigned = true`. Then:
     * **Low eight bits:** Set `Read_raw = true`.
-    * **Shifting, rounding, and saturating:** Set `Read_raw = false`. Set the low five bits of `ShiftAmount` to the desired right-shift amount; note that this shifts the magnitude right, leaves the sign bit as-is, and fills the gap with zeros. The shifted-out bits (if any) are used for rounding.
+    * **Shifting, rounding, and saturating:** Set `Read_raw = false`. Set the low five bits of `ShiftAmount` to the desired right-shift amount; note that this shifts the magnitude right, leaves the sign bit as-is, and fills the gap with zeros. The shifted-out bits (if any) are used for rounding. The magnitude is saturated to 255 and the sign is then dropped, so a negative input becomes its saturated magnitude rather than 0 (e.g. -5 becomes 5).
 * **From BF16:** Set `Read_32b_data = false`, then:
   * **To TF32:** Set `Read_raw = false`, then choose any of:
     * Set `IntermediateFormat = TF32`.
