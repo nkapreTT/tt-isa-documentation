@@ -170,7 +170,7 @@ uint32_t fma_model_bh(uint32_t x, uint32_t y, uint32_t z) { // Compute x * y + z
   r_e += n;
   if (r_e >= 255) return r_sign | 0x7f800000; // Inf
   if (r_e <= 0) { // Denorm or zero
-    n += 1;
+    n += 1 - r_e;
     r_e = 0;
   }
   if (n <= 0) r_m <<= -n; else r_m = (r_m >> n) | ((r_m & (n | 1)) != 0);
